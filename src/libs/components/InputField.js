@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { View } from "react-native";
-import { Icon, Input, Text } from "react-native-elements";
-import { useFormik, useFormikContext } from "formik";
+import { View, Text } from "react-native";
+import { Icon, Input } from "react-native-elements";
+import { useFormikContext } from "formik";
+
 const InputField = ({
   label,
   field,
@@ -22,6 +23,7 @@ const InputField = ({
   const isValid = !form.errors[field.name];
   const isInvalid = form.touched[field.name] && !isValid;
   const [focus, setFocus] = useState(false);
+  const { handleBlur, validateField } = useFormikContext();
 
   const handleFocus = () => {
     setFocus(true);
@@ -29,7 +31,8 @@ const InputField = ({
 
   const onBlur = () => {
     setFocus(false);
-    form.handleBlur(field.name);
+    handleBlur(id);
+    validateField(id);
   };
 
   return (
@@ -40,11 +43,11 @@ const InputField = ({
         style={{
           position: "absolute",
           zIndex: 1,
-          color: focus || field.value ? "#4568e0" : "#8c9397",
+          color: focus || value ? "#4568e0" : "#8c9397",
           left: 10,
-          fontSize: focus || field.value ? 13 : 17,
+          fontSize: focus || value ? 13 : 17,
           fontWeight: "400",
-          top: focus || field.value ? 4 : 15,
+          top: focus || value ? 4 : 15,
         }}
       >
         {placeholder}
@@ -56,12 +59,31 @@ const InputField = ({
           borderColor: focus ? "#4568e0" : !isValid ? "red" : "#d6d5d8",
         }}
         type={type}
-        value={field.value}
-        onChangeText={form.handleChange(field.name)}
+        value={value}
+        name={name}
+        id={id}
         onFocus={handleFocus}
         onBlur={onBlur}
+        maxLength={maxLength}
+        keyboardType={keyboardType}
+        placeholder={display}
         isValid={form.touched[field.name] && isValid}
         isInvalid={isInvalid}
+        feedback={form.errors[field.name]}
+        autoComplete={
+          id === "firstname"
+            ? "name-given"
+            : id === "lastname"
+            ? "name-family"
+            : null
+        }
+        textContentType={
+          id === "firstname"
+            ? "givenName"
+            : id === "lastname"
+            ? "familyName"
+            : null
+        }
         rightIcon={
           isValid ? (
             <Icon
@@ -74,8 +96,9 @@ const InputField = ({
           )
         }
         {...props}
-      ></Input>
+      />
     </View>
   );
 };
+
 export default InputField;

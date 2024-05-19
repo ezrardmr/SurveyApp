@@ -12,6 +12,7 @@ import {
   Image,
   ScrollView,
   Platform,
+  Alert,
 } from "react-native";
 import { useDispatch } from "react-redux";
 import Styles from "../styles/Styles";
@@ -38,13 +39,24 @@ const Login = ({ navigation }) => {
   const handleSubmit = (formProps) => {
     console.log("formProps", formProps);
     const { username, password } = formProps;
-
-    dispatch(login(formProps)).then((value) => {
-      console.log("gelen", value);
-      if (value) {
-        // navigation.navigate("Home");
-      }
-    });
+    if (username === "johnd" && password === "m38rmF$") {
+      dispatch(login(formProps)).then((value) => {
+        console.log("gelen", value);
+        if (value) {
+          // navigation.navigate("Home");
+        }
+      });
+    } else {
+      Alert.alert(
+        "Hata",
+        "Geçersiz kullanıcı adı veya şifre girdiniz 1 id'li kullanıcı ile giriş yapmayı deneyin.",
+        [
+          {
+            text: "Ok",
+          },
+        ]
+      );
+    }
   };
 
   return (

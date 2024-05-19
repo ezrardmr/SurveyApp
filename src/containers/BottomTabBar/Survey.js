@@ -21,6 +21,12 @@ const Survey = ({}) => {
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [isPressed, setIsPressed] = useState(false);
   const [contentHeight, setContentHeight] = useState(new Animated.Value(80));
+  const [surveyData, setSurveyData] = useState([]);
+
+  useEffect(() => {
+    // Verileri yükle
+    getJsonData();
+  }, []);
 
   useEffect(() => {
     if (selectedItemId) {
@@ -44,6 +50,21 @@ const Survey = ({}) => {
     console.log("Icon pressed");
     console.log("Selected item:", item);
   };
+
+  const getJsonData = async (key) => {
+    try {
+      const jsonValue = await AsyncStorage.getItem(key);
+      if (key == "survey") {
+        setSurveyData(jsonValue);
+        return jsonValue != null ? jsonValue : null;
+      } else {
+        return jsonValue != null ? JSON.parse(jsonValue) : null;
+      }
+    } catch (e) {
+      // error reading value
+    }
+  };
+  console.log("survey", surveyData);
 
   const DATA = [
     {

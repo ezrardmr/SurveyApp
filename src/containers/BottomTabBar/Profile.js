@@ -13,16 +13,25 @@ import Styles from "../../styles/Styles";
 import GoogleIcons from "react-native-vector-icons/MaterialIcons";
 import * as Yup from "yup";
 import { Formik } from "formik";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import ProfileForm from "../../components/Form/ProfileForm";
 import { useDispatch } from "react-redux";
-import { logout } from "../../store/actions/securityActions";
+import { getUser, logout } from "../../store/actions/securityActions";
 
 const Profile = ({}) => {
+  const [currentUser, setCurrentUser] = useState({});
+  const [editable, setEditable] = useState(false);
   const dispatch = useDispatch();
+  const scrollRef = useRef();
+
+  useEffect(() => {
+    dispatch(getUser()).then((response) => {
+      setCurrentUser(response);
+    });
+  }, []);
 
   const initialValues = {
-    nickName: "",
+    username: "",
     email: "",
     dateBirth: "",
     genger: "",
@@ -35,18 +44,20 @@ const Profile = ({}) => {
     genger: Yup.string().label("genger").required(""),
   });
 
-  const scrollRef = useRef();
+  const handleEditPress = () => {
+    setEditable(!editable);
+  };
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : null}
       enabled={false}
       style={{ flex: 1 }}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
           ref={scrollRef}
-          style={styles.vehicleAdNewFooter}
+          style={{ flexDirection: "column", paddingBottom: 100 }}
           contentContainerStyle={{
             flexGrow: 1,
           }}
@@ -54,124 +65,130 @@ const Profile = ({}) => {
         >
           <View
             style={{
-              flex: 15,
+              flex: 1,
               left: 40,
-              marginTop: 40,
+              marginTop: 10,
             }}
           >
             <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
+              style={{ width: "80%", justifyContent: "space-between", flex: 1 }}
             >
-              <View style={{ flexDirection: "row" }}>
-                <GoogleIcons name={"person"} style={styles.icon} />
-                <Text style={{ top: 20, color: "#101090", fontSize: 20 }}>
-                  {" "}
-                  PROFİL{" "}
-                </Text>
-              </View>
-              <View>
-                <TouchableOpacity onPress={() => dispatch(logout())}>
-                  <GoogleIcons
-                    name={"logout"}
-                    style={{
-                      right: 85,
-                      top: 20,
-                      fontSize: 30,
-                      color: "#101090",
-                    }}
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-            <Text style={{ top: 30, opacity: 0.5 }}> Hesap Bilgileri</Text>
-
-            <View style={{ width: "92%", top: 50, width: "80%" }}>
-              <Formik
-                enableReinitialize={true}
-                initialValues={initialValues}
-                onSubmit={(values) => {
-                  handleSubmit(values);
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                 }}
-                validator={validationSchema}
               >
-                {({
-                  handleChange,
-                  values,
-                  handleSubmit,
-                  errors,
-                  isValid,
-                  isSubmitting,
-                  touched,
-                  handleBlur,
-                  setFieldValue,
-                }) => (
-                  <>
-                    <ProfileForm
-                      handleChange={handleChange}
-                      handleBlur={handleBlur}
-                      setFieldValue={setFieldValue}
-                      values={values}
+                <View style={{ flexDirection: "row" }}>
+                  <GoogleIcons name={"person"} style={styles.icon} />
+                  <Text style={{ top: 20, color: "#101090", fontSize: 20 }}>
+                    {" "}
+                    PROFİL{" "}
+                  </Text>
+                </View>
+                <View>
+                  <TouchableOpacity onPress={() => dispatch(logout())}>
+                    <GoogleIcons
+                      name={"logout"}
+                      style={{
+                        right: 10,
+                        top: 20,
+                        fontSize: 30,
+                        color: "#101090",
+                      }}
                     />
+                  </TouchableOpacity>
+                </View>
+              </View>
 
-                    <Text style={{ top: 10, opacity: 0.5 }}> Hakkımızda</Text>
+              <View style={{ flex: 1, top: 20 }}>
+                <Text style={{ opacity: 0.5 }}> Hesap Bilgileri</Text>
+                <Formik
+                  enableReinitialize={true}
+                  initialValues={currentUser}
+                  onSubmit={(values) => {
+                    handleSubmit(values);
+                  }}
+                  validator={validationSchema}
+                >
+                  {({
+                    handleChange,
+                    values,
+                    handleSubmit,
+                    errors,
+                    isValid,
+                    isSubmitting,
+                    touched,
+                    handleBlur,
+                    setFieldValue,
+                  }) => (
+                    <>
+                      <ProfileForm
+                        handleChange={handleChange}
+                        handleBlur={handleBlur}
+                        setFieldValue={setFieldValue}
+                        values={values}
+                        editable={editable}
+                        onEditPress={handleEditPress}
+                      />
 
-                    <TouchableOpacity
-                      style={{
-                        borderColor: "#d6d5d8",
-                        borderWidth: 1,
-                        borderRadius: 8,
-                        height: 50,
-                        backgroundColor: "#d6d5d8",
-                        marginBottom: 10,
-                        top: 20,
-                      }}
-                    >
-                      <Text
+                      <Text style={{ top: 10, opacity: 0.5 }}> Hakkımızda</Text>
+
+                      <TouchableOpacity
                         style={{
-                          textAlign: "left",
-                          fontSize: 15,
-                          lineHeight: 19,
-                          fontWeight: "500",
-                          top: 9,
-                          color: "#101090",
+                          borderColor: "#d6d5d8",
+                          borderWidth: 1,
+                          borderRadius: 8,
+                          height: 50,
+                          backgroundColor: "#d6d5d8",
+                          marginBottom: 10,
+                          top: 20,
                         }}
                       >
-                        {" "}
-                        Gizlilik Politikası
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={{
-                        borderColor: "#d6d5d8",
-                        borderWidth: 1,
-                        borderRadius: 8,
-                        height: 50,
-                        backgroundColor: "#d6d5d8",
-                        marginBottom: 10,
-                        top: 20,
-                      }}
-                    >
-                      <Text
+                        <Text
+                          style={{
+                            textAlign: "left",
+                            fontSize: 15,
+                            lineHeight: 19,
+                            fontWeight: "500",
+                            top: 9,
+                            color: "#101090",
+                          }}
+                        >
+                          {" "}
+                          Gizlilik Politikası
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
                         style={{
-                          textAlign: "left",
-                          fontSize: 15,
-                          lineHeight: 19,
-                          fontWeight: "500",
-                          top: 9,
-                          color: "#101090",
+                          borderColor: "#d6d5d8",
+                          borderWidth: 1,
+                          borderRadius: 8,
+                          height: 50,
+                          backgroundColor: "#d6d5d8",
+                          marginBottom: 10,
+                          top: 20,
                         }}
                       >
-                        {" "}
-                        Şartlar ve Koşullar
-                      </Text>
-                    </TouchableOpacity>
-                  </>
-                )}
-              </Formik>
+                        <Text
+                          style={{
+                            textAlign: "left",
+                            fontSize: 15,
+                            lineHeight: 19,
+                            fontWeight: "500",
+                            top: 9,
+                            color: "#101090",
+                          }}
+                        >
+                          {" "}
+                          Şartlar ve Koşullar
+                        </Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
+                </Formik>
+              </View>
             </View>
           </View>
         </ScrollView>

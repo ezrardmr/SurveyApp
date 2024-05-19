@@ -21,6 +21,15 @@ export const login = (loginCred) => async (dispatch) => {
   }
 };
 
+export const getUser = () => async (dispatch) => {
+  try {
+    const response = await axios.get(`/users/1`);
+    return response.data;
+  } catch (e) {
+    return "error";
+  }
+};
+
 export const logout = () => (dispatch) => {
   dispatch({ type: actionTypes.LOGOUT_REQUESTED });
   try {

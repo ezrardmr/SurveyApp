@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,9 +13,18 @@ import {
 } from "react-native";
 import { useDispatch } from "react-redux";
 import Styles from "../../styles/Styles";
+import { getUser } from "../../store/actions/securityActions";
 
 const Home = ({ navigation }) => {
+  const [currentUser, setCurrentUser] = useState({});
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getUser()).then((response) => {
+      console.log("res", response);
+      setCurrentUser(response);
+    });
+  }, []);
 
   return (
     <KeyboardAvoidingView
@@ -45,7 +54,9 @@ const Home = ({ navigation }) => {
               }}
             >
               <Text style={{ fontSize: 20 }}> Merhaba </Text>
-              <Text style={{ fontSize: 20, color: "#0000c8" }}> Esra</Text>
+              <Text style={{ fontSize: 20, color: "#0000c8" }}>
+                {currentUser.username}
+              </Text>
             </View>
 
             <View>

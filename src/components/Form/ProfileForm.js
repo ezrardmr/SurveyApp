@@ -1,25 +1,42 @@
 import { Field } from "formik";
 import InputField from "../../libs/components/InputField";
 import Styles from "../../styles/Styles";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { TouchableOpacity } from "react-native";
+import GoogleIcons from "react-native-vector-icons/MaterialIcons";
 
-const ProfileForm = ({ handleChange, handleBlur, setFieldValue, values }) => {
+const ProfileForm = ({
+  handleChange,
+  handleBlur,
+  setFieldValue,
+  values,
+  editable,
+  onEditPress,
+}) => {
   const nicknameInputRef = useRef(null);
   const emailInputRef = useRef(null);
   const dateBirthInputRef = useRef(null);
   const gengerInputRef = useRef(null);
+
+  const [nicknameEditable, setNicknameEditable] = useState(false);
+  const [emailEditable, setEmailEditable] = useState(false);
+  const [dateBirthEditable, setDateBirthEditable] = useState(false);
+  const [genderEditable, setGenderEditable] = useState(false);
+
   return (
     <>
       <Field
         inputContainerStyle={Styles.LabelStyle}
-        containerStyle={Styles.InputStyle}
+        containerStyle={
+          nicknameEditable ? Styles.InputStyle : Styles.InputStyleDisabled
+        }
         style={Styles.input}
         type="text"
-        name="nickName"
-        value={values.nickName}
-        onChangeText={handleChange("nickName")}
+        name="username"
+        value={values.username}
+        onChangeText={handleChange("username")}
         placeholder="Nickname"
-        id="nickName"
+        id="username"
         component={InputField}
         // validate={validateFirstName}
         hasFeedback
@@ -33,9 +50,17 @@ const ProfileForm = ({ handleChange, handleBlur, setFieldValue, values }) => {
           }
         }}
       />
+      <TouchableOpacity
+        onPress={() => setNicknameEditable(!nicknameEditable)}
+        style={{ bottom: 40, left: 300 }}
+      >
+        <GoogleIcons name={"edit"} style={{}} />
+      </TouchableOpacity>
       <Field
         inputContainerStyle={Styles.LabelStyle}
-        containerStyle={Styles.InputStyle}
+        containerStyle={
+          emailEditable ? Styles.InputStyle : Styles.InputStyleDisabled
+        }
         style={Styles.input}
         type="text"
         name="email"
@@ -57,14 +82,22 @@ const ProfileForm = ({ handleChange, handleBlur, setFieldValue, values }) => {
           }
         }}
       />
+      <TouchableOpacity
+        onPress={() => setEmailEditable(!emailEditable)}
+        style={{ bottom: 40, left: 300 }}
+      >
+        <GoogleIcons name={"edit"} style={{}} />
+      </TouchableOpacity>
 
       <Field
         inputContainerStyle={Styles.LabelStyle}
-        containerStyle={Styles.InputStyle}
+        containerStyle={
+          dateBirthEditable ? Styles.InputStyle : Styles.InputStyleDisabled
+        }
         style={Styles.input}
         type="text"
         name="dateBirth"
-        value={values.dateBirth}
+        value={values.dateBirth || "10.10.1998"}
         onChangeText={handleChange("dateBirth")}
         placeholder="Doğum Günü"
         id="dateBirth"
@@ -81,14 +114,22 @@ const ProfileForm = ({ handleChange, handleBlur, setFieldValue, values }) => {
           }
         }}
       />
+      <TouchableOpacity
+        onPress={() => setDateBirthEditable(!dateBirthEditable)}
+        style={{ bottom: 40, left: 300 }}
+      >
+        <GoogleIcons name={"edit"} style={{}} />
+      </TouchableOpacity>
 
       <Field
         inputContainerStyle={Styles.LabelStyle}
-        containerStyle={Styles.InputStyle}
+        containerStyle={
+          genderEditable ? Styles.InputStyle : Styles.InputStyleDisabled
+        }
         style={Styles.input}
         type="text"
         name="genger"
-        value={values.dateBirth}
+        value={values.genger || "Erkek"}
         onChangeText={handleChange("genger")}
         placeholder="Cinsiyet"
         id="genger"
@@ -105,6 +146,12 @@ const ProfileForm = ({ handleChange, handleBlur, setFieldValue, values }) => {
             }
           }}*/
       />
+      <TouchableOpacity
+        onPress={() => setGenderEditable(!genderEditable)}
+        style={{ bottom: 40, left: 300 }}
+      >
+        <GoogleIcons name={"edit"} style={{ color: "#101090" }} />
+      </TouchableOpacity>
     </>
   );
 };

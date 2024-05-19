@@ -84,6 +84,14 @@ const Styles = StyleSheet.create({
     backgroundColor: "white",
     marginBottom: 10,
   },
+  InputStyleDisabled: {
+    borderColor: "#d6d5d8",
+    borderWidth: 1,
+    borderRadius: 8,
+    height: 50,
+    backgroundColor: "#d6d5d8",
+    marginBottom: 10,
+  },
   PhoneNumLabelStyle: {
     borderBottomWidth: 0,
     width: "100%",
