@@ -11,10 +11,11 @@ import {
   StyleSheet,
   Image,
 } from "react-native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Styles from "../styles/Styles";
 import GoogleIcons from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { loadSurvey, saveSurveyData } from "../store/actions/surveyActions";
 
 const Questions = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -24,9 +25,67 @@ const Questions = ({ navigation }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [selectedRating, setSelectedRating] = useState(0);
   const [points, setPoints] = useState([]);
+  const [currentSurvey, setCurrenSurvey] = useState();
+  let questionPoints = 0;
 
   const surveyDate = new Date();
   const surveyTime = surveyDate.toLocaleTimeString();
+
+  /*useEffect(() => {
+    dispatch(loadSurvey()).then(() => {});
+  }, []);
+  
+  const allSurvey = useSelector((state) => state.surveyReducer.allSurvey);
+  const allSurveyLoading = useSelector(
+    (state) => state.surveyReducer.allSurveyLoading
+  );
+  console.log("allsurvey", allSurvey);*/
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const savedData = await AsyncStorage.getItem("surveyData");
+        console.log("saved", savedData);
+        if (savedData) {
+          const { currentQuestionIndex, answers, points } =
+            JSON.parse(savedData);
+          setCurrentQuestionIndex(currentQuestionIndex);
+          setAnswers(answers);
+          setPoints(points);
+        } else {
+          // Veri yüklenemediğinde, varsayılan değerleri kullanabilirsiniz.
+          AsyncStorage.removeItem("surveyData");
+          setCurrentQuestionIndex(0);
+          setAnswers([]);
+          setPoints(0);
+        }
+      } catch (error) {
+        console.error("Error loading data: ", error);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const saveData = async () => {
+    const surveyData = {
+      currentQuestionIndex,
+      answers,
+      surveyDate,
+      surveyTime,
+      points: points + questionPoints,
+    };
+    console.log("Survey Data:", surveyData);
+    try {
+      await AsyncStorage.setItem("surveyData", JSON.stringify(surveyData));
+    } catch (error) {
+      console.error("Error saving data: ", error);
+    }
+  };
+
+  useEffect(() => {
+    saveData();
+  }, [currentQuestionIndex, answers, surveyDate, surveyTime, points]);
 
   const surveyQuestions = [
     {
@@ -68,14 +127,53 @@ const Questions = ({ navigation }) => {
   ];
 
   const handleNextQuestion = (userAnswer) => {
-    // Kullanıcının cevabını answers dizisine ekle
-    setAnswers([...answers, userAnswer]);
-    setSelectedOption(null);
-    setCurrentQuestionIndex(currentQuestionIndex + 1);
-    setPoints([...points, 10]);
+    if (currentQuestionIndex < surveyQuestions.length - 1) {
+      if (
+        currentQuestion.type === "multiple_choice" &&
+        selectedOption !== null
+      ) {
+        setAnswers([...answers, selectedOption]);
+        const optionIndex = currentQuestion.options.indexOf(selectedOption);
+        questionPoints = 5 - optionIndex; // multiple_choice için puanlama
+      } else if (currentQuestion.type === "yes_no" && selectedOption !== null) {
+        setAnswers([...answers, selectedOption]);
+        questionPoints = selectedOption === "Evet" ? 5 : 0; // yes_no için puanlama
+      } else if (currentQuestion.type === "rating" && selectedRating !== 0) {
+        setAnswers([...answers, selectedRating]);
+        questionPoints = selectedRating; // rating için puanlama
+      }
+
+      // Seçili seçeneği ve puanı sıfırla, bir sonraki soruya geç
+      setSelectedOption(null);
+      setSelectedRating(0);
+      setPoints((prevPoints) => prevPoints + questionPoints);
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      AsyncStorage.removeItem("surveyData");
+    } else {
+      if (
+        currentQuestion.type === "multiple_choice" &&
+        selectedOption !== null
+      ) {
+        setAnswers([...answers, selectedOption]);
+        const optionIndex = currentQuestion.options.indexOf(selectedOption);
+        questionPoints = 5 - optionIndex; // multiple_choice için puanlama
+      } else if (currentQuestion.type === "yes_no" && selectedOption !== null) {
+        setAnswers([...answers, selectedOption]);
+        questionPoints = selectedOption === "Evet" ? 5 : 0; // yes_no için puanlama
+      } else if (currentQuestion.type === "rating" && selectedRating !== 0) {
+        setAnswers([...answers, selectedRating]);
+        questionPoints = selectedRating; // rating için puanlama
+      }
+
+      // Anket tamamlandığında
+      setPoints((prevPoints) => prevPoints + questionPoints);
+      console.log("Anket tamamlandı!", answers);
+      navigation.navigate("Survey");
+    }
   };
 
   const currentQuestion = surveyQuestions[currentQuestionIndex];
+
   const handleRate = (rating) => {
     console.log("Rated:", rating);
     setSelectedRating(rating);
@@ -84,28 +182,7 @@ const Questions = ({ navigation }) => {
   const handleSelect = (option) => {
     console.log("Selected option:", option);
     setSelectedOption(option);
-    // Burada seçilen seçeneği işleyebilirsiniz
   };
-
-  const saveData = async () => {
-    const surveyData = {
-      currentQuestionIndex,
-      answers,
-      surveyDate,
-      surveyTime,
-      points,
-    };
-    console.log("Survey Data:", surveyData);
-    try {
-      await AsyncStorage.setItem("surveyData", JSON.stringify(surveyData));
-    } catch (error) {
-      console.error("Error saving data: ", error);
-    }
-  };
-
-  useEffect(() => {
-    saveData();
-  }, [currentQuestionIndex, answers, surveyDate, surveyTime, points]);
 
   const renderQuestionView = (question) => {
     switch (question.type) {
@@ -207,7 +284,6 @@ const Questions = ({ navigation }) => {
                   style={styles.activeButtonIconStyle}
                 />
               </TouchableOpacity>
-              <Text style={{ top: 20, left: 100 }}>Sayac</Text>
             </View>
             <View
               style={{
@@ -249,7 +325,7 @@ const Questions = ({ navigation }) => {
                     borderRadius: 2,
                     borderColor: "white",
                     backgroundColor:
-                      currentQuestionIndex > 1 ? "#e0e1ec" : "#aacbe9",
+                      currentQuestionIndex >= 1 ? "#e0e1ec" : "#aacbe9",
                   }}
                 />
                 <View
@@ -293,9 +369,11 @@ const Questions = ({ navigation }) => {
                   <Text
                     style={{ fontWeight: "bold", color: "white", fontSize: 15 }}
                   >
-                    1
+                    {currentQuestionIndex + 1}
                   </Text>
-                  <Text style={{ color: "white", opacity: 0.5 }}>/5</Text>
+                  <Text style={{ color: "white", opacity: 0.5 }}>
+                    /{surveyQuestions.length}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -359,10 +437,13 @@ const Questions = ({ navigation }) => {
                 <TouchableOpacity
                   onPress={() => {
                     if (currentQuestionIndex < surveyQuestions.length - 1) {
+                      console.log("survey", surveyQuestions.length);
+                      console.log("currentQuestionIndex", currentQuestionIndex);
                       handleNextQuestion(null); // null, kullanıcının cevap vermediği anlamına gelir
                     } else {
                       navigation.navigate("Survey");
                       console.log("Anket tamamlandı!", answers);
+                      AsyncStorage.removeItem("surveyData");
                     }
                   }}
                   style={{

@@ -11,13 +11,42 @@ import {
   StyleSheet,
   Image,
 } from "react-native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Styles from "../../styles/Styles";
 import { getUser } from "../../store/actions/securityActions";
+import { loadSurvey } from "../../store/actions/surveyActions";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Home = ({ navigation }) => {
   const [currentUser, setCurrentUser] = useState({});
   const dispatch = useDispatch();
+  const [surveyData, setSurveyData] = useState([]);
+
+  useEffect(() => {
+    dispatch(loadSurvey()).then(() => {});
+  }, []);
+
+  const allSurvey = useSelector((state) => state.surveyReducer.allSurvey);
+  const allSurveyLoading = useSelector(
+    (state) => state.surveyReducer.allSurveyLoading
+  );
+  console.log("allsurvey", allSurvey);
+  /* useEffect(() => {
+    const loadData = async () => {
+      try {
+        const savedData = await AsyncStorage.getItem("surveyData");
+        if (savedData !== null) {
+          const parsedData = JSON.parse(savedData);
+          console.log("parsed", parsedData);
+          setSurveyData(parsedData);
+        }
+      } catch (error) {
+        console.error("Error loading data: ", error);
+      }
+    };
+
+    loadData();
+  }, []);*/
 
   useEffect(() => {
     dispatch(getUser()).then((response) => {

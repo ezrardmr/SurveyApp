@@ -50,8 +50,8 @@ const Profile = ({}) => {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : null}
-      enabled={false}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      enabled={true}
       style={{ flex: 1 }}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

@@ -15,6 +15,8 @@ import GoogleIcons from "react-native-vector-icons/MaterialIcons";
 import * as Yup from "yup";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import moment from "moment";
 
 const Survey = ({}) => {
   const dispatch = useDispatch();
@@ -24,9 +26,30 @@ const Survey = ({}) => {
   const [surveyData, setSurveyData] = useState([]);
 
   useEffect(() => {
-    // Verileri yükle
-    getJsonData();
+    const loadData = async () => {
+      try {
+        const savedData = await AsyncStorage.getItem("surveyData");
+        if (savedData !== null) {
+          const parsedData = JSON.parse(savedData);
+          console.log("parsed", parsedData);
+          setSurveyData(parsedData);
+        }
+      } catch (error) {
+        console.error("Error loading data: ", error);
+      }
+    };
+
+    loadData();
   }, []);
+
+  /* useEffect(() => {
+    dispatch(loadSurvey()).then(() => {});
+  }, []);
+
+  const allSurvey = useSelector((state) => state.surveyReducer.allSurvey);
+  const allSurveyLoading = useSelector(
+    (state) => state.surveyReducer.allSurveyLoading
+  );*/
 
   useEffect(() => {
     if (selectedItemId) {
@@ -51,21 +74,6 @@ const Survey = ({}) => {
     console.log("Selected item:", item);
   };
 
-  const getJsonData = async (key) => {
-    try {
-      const jsonValue = await AsyncStorage.getItem(key);
-      if (key == "survey") {
-        setSurveyData(jsonValue);
-        return jsonValue != null ? jsonValue : null;
-      } else {
-        return jsonValue != null ? JSON.parse(jsonValue) : null;
-      }
-    } catch (e) {
-      // error reading value
-    }
-  };
-  console.log("survey", surveyData);
-
   const DATA = [
     {
       id: "1",
@@ -82,6 +90,7 @@ const Survey = ({}) => {
   ];
 
   const Row = ({ item }) => {
+    console.log("survey", surveyData);
     const isSelected = selectedItemId === item.id;
     return (
       <Animated.View style={[styles.rowStyle, { height: contentHeight }]}>
@@ -112,14 +121,18 @@ const Survey = ({}) => {
                 name={"date-range"}
                 style={{ fontSize: 20, color: "#101090" }}
               />
-              <Text> 16.05.2024</Text>
+              <Text>{moment(surveyData.surveyDate).format("DD-MM-YYYY")}</Text>
             </View>
             <View style={{ flexDirection: "row", left: 10 }}>
               <GoogleIcons
                 name={"access-time"}
                 style={{ fontSize: 20, color: "#101090" }}
               />
-              <Text> 09:10</Text>
+              <Text>
+                {moment(surveyData.surveyTime, ["h:mm:ss A", "H:mm:ss"]).format(
+                  "H:mm"
+                )}
+              </Text>
             </View>
           </View>
           {isSelected && (

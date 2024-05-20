@@ -1,5 +1,12 @@
 import React from "react";
-import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -169,29 +176,35 @@ const Navi = () => {
     </View>
   ) : (
     <View style={{ flex: 1 }}>
-      <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen
-            name="BottomTabNavigator"
-            component={BottomTabNavigator}
-            options={{
-              headerShown: false,
-              drawerItemStyle: { display: "none" },
-            }}
-          />
-          <Stack.Screen
-            name="Questions"
-            options={{
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+        enabled
+      >
+        <NavigationContainer>
+          <Stack.Navigator
+            screenOptions={{
               headerShown: false,
             }}
-            component={Questions}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+          >
+            <Stack.Screen
+              name="BottomTabNavigator"
+              component={BottomTabNavigator}
+              options={{
+                headerShown: false,
+                drawerItemStyle: { display: "none" },
+              }}
+            />
+            <Stack.Screen
+              name="Questions"
+              options={{
+                headerShown: false,
+              }}
+              component={Questions}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </KeyboardAvoidingView>
     </View>
   );
 };
