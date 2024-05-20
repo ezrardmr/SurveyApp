@@ -1,4 +1,4 @@
-#INSTALL
+# INSTALL
 ```
 git clone https://github.com/ezrardmr/SurveyApp.git
 ```
